@@ -653,26 +653,28 @@
     div.className = 'slot-row';
     div.id = `slot-row-${id}`;
     div.innerHTML = `
-      <div class="slot-row-label">Slot ${id}</div>
-      <div class="form-group" style="margin-bottom:0">
-        <label style="font-size:.72rem">Start Time</label>
-        <input class="form-control" id="slot-start-${id}" type="time" />
-      </div>
-      <div class="form-group" style="margin-bottom:0">
-        <label style="font-size:.72rem">End Time</label>
-        <input class="form-control" id="slot-end-${id}" type="time" />
-      </div>
-      <div>
-        <label style="font-size:.72rem;display:block;margin-bottom:6px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em">Cap.</label>
-        <input class="form-control" id="slot-cap-${id}" type="number" value="10" min="1" max="200"
-          style="text-align:center;font-weight:700" />
-      </div>
-      <button class="slot-delete" onclick="removeSlot(${id})" title="Remove slot">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
+       <div class="slot-row-label" style="grid-column:1/-1">Slot ${id}</div>
+       <div class="form-group" style="margin-bottom:0">
+         <label style="font-size:.72rem">Start Time</label>
+         <input class="form-control" id="slot-start-${id}" type="time"/>
+       </div>
+       <div class="form-group" style="margin-bottom:0">
+         <label style="font-size:.72rem">End Time</label>
+         <input class="form-control" id="slot-end-${id}" type="time"/>
+       </div>
+       <div class="form-group" style="margin-bottom:0">
+         <label style="font-size:.72rem">Capacity</label>
+         <input class="form-control" id="slot-cap-${id}" type="number" value="10" min="1" max="200"
+        style="text-align:center;font-weight:700"/>
+       </div>
+       <div style="padding-top:22px">
+          <button class="slot-delete" onclick="removeSlot(${id})" title="Remove slot">
+           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+        </div>
     `;
     // Fix grid for 5 columns
-    div.style.gridTemplateColumns = '80px 1fr 1fr 80px 40px';
+    div.style.gridTemplateColumns = '1fr 1fr 100px 40px';
     document.getElementById('slot-builder').appendChild(div);
     updatePreview();
   }
