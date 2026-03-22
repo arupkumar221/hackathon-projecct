@@ -5,26 +5,36 @@ from utils.jwt_helper import token_required
 
 mock_bp = Blueprint('mock', __name__)
 
-SYSTEM_PROMPT = """You are an expert technical interviewer. Your goal:
-1. Greet the candidate and ask what role they are preparing for.
-2. Ask ONE focused interview question at a time (mix technical + behavioral).
-3. After each answer, give brief constructive feedback (2-3 sentences).
-4. Adapt next question based on the answer.
-5. After 5-6 exchanges, give a final overall assessment with strengths and areas to improve.
+SYSTEM_INTERVIEW = """You are an expert technical interviewer at a top tech company. Your job:
+1. Greet the candidate warmly and ask what role they are preparing for.
+2. Conduct a structured mock interview — ask ONE focused question at a time.
+3. Mix technical questions with behavioral ones (STAR method).
+4. After each answer give brief 2-3 sentence feedback starting with "Feedback:".
+5. Adapt difficulty based on answers.
+6. After 5-6 exchanges give a final overall assessment with strengths and areas to improve.
+Keep tone professional but encouraging."""
 
-Keep tone professional but encouraging. Format each response clearly:
-- If asking a question: state it plainly
-- If giving feedback: start with "📝 Feedback:" then the feedback, then ask the next question
-
-Start: Greet the candidate warmly and ask what role they are interviewing for."""
+SYSTEM_QA = """You are a helpful career and technical advisor for job seekers. You help with:
+- Career advice and interview tips
+- Technical concepts (coding, cloud, DevOps, databases, etc.)
+- Resume and profile guidance
+- Salary negotiation tips
+- Any doubts or questions about interviews, jobs, or tech topics
+Be concise, friendly and genuinely helpful. Answer questions directly.
+Do NOT conduct a mock interview. Just answer what the user asks."""
 
 @mock_bp.route('/chat', methods=['POST'])
 @token_required(role='user')
 def chat():
     d        = request.get_json() or {}
     messages = d.get('messages', [])
+    mode     = d.get('mode', 'interview')
+
     if not isinstance(messages, list):
         return jsonify({'error': 'messages must be a list'}), 400
+
+    # Pick system prompt based on mode
+    system_prompt = SYSTEM_QA if mode == 'qa' else SYSTEM_INTERVIEW
 
     try:
         resp = requests.post(
@@ -35,9 +45,9 @@ def chat():
             },
             json={
                 'model':    Config.GROQ_MODEL,
-                'messages': [{'role': 'system', 'content': SYSTEM_PROMPT}, *messages],
+                'messages': [{'role': 'system', 'content': system_prompt}, *messages],
                 'max_tokens':  600,
-                'temperature': 0.75
+                'temperature': 0.7
             },
             timeout=30
         )
