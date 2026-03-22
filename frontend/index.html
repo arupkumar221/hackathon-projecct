@@ -6,127 +6,204 @@
   <title>HireWalk — Walk-in Interview Platform</title>
   <link rel="stylesheet" href="css/style.css" />
   <style>
-    .portal-section { padding: 80px 20px; }
-    .portal-section h2 { text-align:center; font-size:2rem; font-weight:700; color:var(--primary); margin-bottom:8px; }
-    .portal-section .subtitle { text-align:center; color:var(--muted); margin-bottom:48px; }
-    .portal-grid { display:grid; grid-template-columns:1fr 1fr; gap:32px; max-width:900px; margin:0 auto; }
-    .portal-card { border-radius:20px; overflow:hidden; box-shadow:var(--shadow); transition:transform .25s, box-shadow .25s; }
-    .portal-card:hover { transform:translateY(-6px); box-shadow:0 16px 48px rgba(30,58,95,.18); }
-    .portal-card .portal-top { padding:40px; text-align:center; color:#fff; }
-    .portal-card.company .portal-top { background:linear-gradient(135deg,#1e3a5f,#2d5a9e); }
-    .portal-card.user    .portal-top { background:linear-gradient(135deg,#065f46,#059669); }
-    .portal-card .portal-icon { font-size:3rem; margin-bottom:12px; }
-    .portal-card h3 { font-size:1.4rem; font-weight:700; margin-bottom:8px; }
-    .portal-card p  { opacity:.85; font-size:.9rem; }
-    .portal-card .portal-btns { padding:24px; background:#fff; display:flex; gap:10px; justify-content:center; }
-    footer { background:var(--primary); color:rgba(255,255,255,.7); text-align:center; padding:24px; font-size:.875rem; }
-    @media(max-width:640px){ .portal-grid{grid-template-columns:1fr;} }
+    .hero-stat { text-align:center; }
+    .hero-stat .n { font-family:var(--font-display); font-size:2rem; font-weight:700; color:#fff; }
+    .hero-stat .l { font-size:.75rem; color:rgba(255,255,255,.5); text-transform:uppercase; letter-spacing:.06em; margin-top:2px; }
+    .hero-stats { display:flex; gap:40px; justify-content:center; margin-top:56px; padding-top:40px; border-top:1px solid rgba(255,255,255,.1); }
+    .step-num { width:36px; height:36px; border-radius:10px; background:var(--accent); color:#fff; font-weight:700; font-size:.9rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .how-step { display:flex; gap:16px; align-items:flex-start; }
+    .how-step h4 { font-weight:700; color:var(--primary); margin-bottom:4px; font-family:var(--font-display); }
+    .how-step p { font-size:.875rem; color:var(--muted); }
+    .how-grid { display:grid; grid-template-columns:1fr 1fr; gap:32px; max-width:800px; margin:0 auto; }
+    @media(max-width:640px){ .how-grid{grid-template-columns:1fr;} .hero-stats{flex-wrap:wrap;gap:24px;} }
   </style>
 </head>
 <body>
 
+<!-- Splash Screen -->
+<div id="splash">
+  <div class="splash-logo">
+    <div class="splash-icon">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+      </svg>
+    </div>
+    <span class="splash-name">Hire<span>Walk</span></span>
+  </div>
+  <p class="splash-tagline">Walk-in Interview Platform</p>
+  <div class="splash-bar"><div class="splash-bar-fill"></div></div>
+</div>
+
+<!-- Navbar -->
 <nav class="navbar">
-  <div class="nav-brand">🚀 <span>HireWalk</span></div>
-  <div class="nav-links">
-    <button class="nav-btn outline" onclick="location.href='user/login.html'">Login</button>
-    <button class="nav-btn solid"   onclick="location.href='user/register.html'">Get Started</button>
+  <a class="nav-brand" href="index.html">
+    <div class="nav-brand-icon">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round">
+        <path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+      </svg>
+    </div>
+    Hire<span>Walk</span>
+  </a>
+  <div class="nav-links" id="nav-links">
+    <button class="nav-btn ghost" onclick="location.href='user/login.html'">Sign In</button>
+    <button class="nav-btn filled" onclick="location.href='user/register.html'">Get Started</button>
   </div>
 </nav>
 
 <!-- Hero -->
 <section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
   <div class="hero-content">
-    <h1>Find Your Next <span>Walk-in Interview</span><br>Book. Prepare. Succeed.</h1>
-    <p>Connect with top companies, book your interview slot, and practice with our AI Mock Interviewer — all in one place.</p>
-    <div class="hero-btns">
-      <button class="btn btn-white" onclick="location.href='user/register.html'">🎯 Find Interviews</button>
-      <button class="btn btn-outline" onclick="location.href='company/register.html'">🏢 Post a Walk-in</button>
+    <div class="hero-badge">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
+      Platform Now Live
+    </div>
+    <h1>Find & Book<br><span class="accent">Walk-in Interviews</span><br>with Ease</h1>
+    <p>Connect with top companies, book your slot, and practice with our AI Mock Interviewer — all in one place.</p>
+    <div class="hero-actions">
+      <button class="btn btn-primary btn-lg" onclick="location.href='user/register.html'">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Find Interviews
+      </button>
+      <button class="btn btn-outline-white btn-lg" onclick="location.href='company/register.html'">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+        Post a Walk-in
+      </button>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="n">500+</div><div class="l">Interviews Posted</div></div>
+      <div class="hero-stat"><div class="n">10K+</div><div class="l">Candidates</div></div>
+      <div class="hero-stat"><div class="n">200+</div><div class="l">Companies</div></div>
     </div>
   </div>
 </section>
 
 <!-- Features -->
 <section class="features">
-  <div class="container">
-    <h2>Everything You Need</h2>
-    <p class="subtitle">A complete platform for walk-in interview discovery and preparation</p>
+  <div class="container" style="max-width:1100px;margin:0 auto">
+    <div class="features-header">
+      <h2>Everything in One Platform</h2>
+      <p>A complete ecosystem for walk-in interview discovery, booking, and preparation</p>
+    </div>
     <div class="grid-3">
       <div class="feature-card">
-        <span class="feature-icon">📋</span>
+        <div class="feature-icon-wrap">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        </div>
         <h3>Browse Walk-ins</h3>
-        <p>Discover curated walk-in interviews from top companies across all domains.</p>
+        <p>Discover curated walk-in interviews from top companies across all domains and experience levels.</p>
       </div>
       <div class="feature-card">
-        <span class="feature-icon">⚡</span>
-        <h3>Instant Booking</h3>
-        <p>Pick your time slot and confirm your interview booking in seconds.</p>
+        <div class="feature-icon-wrap">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        <h3>Instant Slot Booking</h3>
+        <p>Pick your preferred time slot and confirm your booking instantly — no paperwork, no waiting.</p>
       </div>
       <div class="feature-card">
-        <span class="feature-icon">🤖</span>
+        <div class="feature-icon-wrap">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/></svg>
+        </div>
         <h3>AI Mock Interview</h3>
-        <p>Practice with our AI interviewer — get questions, feedback, and scoring.</p>
+        <p>Practice with our AI interviewer powered by LLaMA. Get real-time questions, answers and feedback.</p>
       </div>
       <div class="feature-card">
-        <span class="feature-icon">📧</span>
+        <div class="feature-icon-wrap">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </div>
         <h3>Email Confirmation</h3>
-        <p>Get instant email confirmation with all your booking details.</p>
+        <p>Receive instant email confirmation with all interview details right after booking your slot.</p>
       </div>
       <div class="feature-card">
-        <span class="feature-icon">🏢</span>
+        <div class="feature-icon-wrap">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+        </div>
         <h3>Company Portal</h3>
-        <p>Companies post walk-ins, manage slots, and track booked candidates.</p>
+        <p>Companies post walk-ins, define time slots, set capacity and track all booked candidates live.</p>
       </div>
       <div class="feature-card">
-        <span class="feature-icon">🔒</span>
-        <h3>Smart Constraints</h3>
-        <p>One active booking per user — no double-booking chaos.</p>
+        <div class="feature-icon-wrap">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <h3>Verified Registration</h3>
+        <p>OTP-based email verification ensures only real users register and book interview slots.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- Portals -->
-<section class="portal-section">
-  <h2>Choose Your Portal</h2>
-  <p class="subtitle">Different entry points for companies and candidates</p>
-  <div class="portal-grid">
-    <div class="portal-card company">
-      <div class="portal-top">
-        <div class="portal-icon">🏢</div>
-        <h3>Company Portal</h3>
-        <p>Post walk-in interviews, manage time slots and track applicants</p>
-      </div>
-      <div class="portal-btns">
-        <button class="btn btn-primary btn-sm" onclick="location.href='company/login.html'">Login</button>
-        <button class="btn btn-white   btn-sm" style="color:var(--primary)" onclick="location.href='company/register.html'">Register</button>
-      </div>
+<!-- How it works -->
+<section class="section" style="background:#fff">
+  <div style="max-width:1100px;margin:0 auto">
+    <h2 class="section-title">How It Works</h2>
+    <p class="section-sub">Get interview-ready in three simple steps</p>
+    <div class="how-grid">
+      <div class="how-step"><div class="step-num">1</div><div><h4>Register & Verify</h4><p>Create your account and verify your email via OTP. Takes less than 2 minutes.</p></div></div>
+      <div class="how-step"><div class="step-num">2</div><div><h4>Browse Interviews</h4><p>Explore walk-in drives filtered by role, company, date and package.</p></div></div>
+      <div class="how-step"><div class="step-num">3</div><div><h4>Book Your Slot</h4><p>Select a time slot, confirm booking, and receive email confirmation instantly.</p></div></div>
+      <div class="how-step"><div class="step-num">4</div><div><h4>Practice with AI</h4><p>Use the AI Mock Interviewer to prepare for your interview and get feedback.</p></div></div>
     </div>
-    <div class="portal-card user">
-      <div class="portal-top">
-        <div class="portal-icon">🎯</div>
-        <h3>Candidate Portal</h3>
-        <p>Browse interviews, book slots and practice with AI mock interviews</p>
+  </div>
+</section>
+
+<!-- Portals -->
+<section class="section">
+  <div style="max-width:1100px;margin:0 auto">
+    <h2 class="section-title">Choose Your Portal</h2>
+    <p class="section-sub" style="margin-bottom:40px">Separate portals for companies and candidates</p>
+    <div class="portal-grid">
+      <div class="portal-card company">
+        <div class="portal-card-top">
+          <div class="portal-card-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+          </div>
+          <h3>Company Portal</h3>
+          <p>Post walk-in interviews, manage time slots, and track booked candidates in real time.</p>
+        </div>
+        <div class="portal-card-btns">
+          <button class="btn btn-primary btn-sm" onclick="location.href='company/login.html'">Sign In</button>
+          <button class="btn btn-ghost btn-sm" onclick="location.href='company/register.html'">Register</button>
+        </div>
       </div>
-      <div class="portal-btns">
-        <button class="btn btn-success btn-sm" onclick="location.href='user/login.html'">Login</button>
-        <button class="btn btn-white   btn-sm" style="color:#065f46" onclick="location.href='user/register.html'">Register</button>
+      <div class="portal-card user">
+        <div class="portal-card-top">
+          <div class="portal-card-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <h3>Candidate Portal</h3>
+          <p>Browse interviews, book slots and practice with the AI mock interviewer to ace your interview.</p>
+        </div>
+        <div class="portal-card-btns">
+          <button class="btn btn-success btn-sm" onclick="location.href='user/login.html'">Sign In</button>
+          <button class="btn btn-ghost btn-sm" onclick="location.href='user/register.html'">Register</button>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
 <footer>
-  <p>© 2025 HireWalk — Walk-in Interview Platform. Built on AWS ☁️</p>
+  <p>&copy; 2025 HireWalk &mdash; Walk-in Interview Platform. Powered by AWS.</p>
 </footer>
 
 <script src="js/auth.js"></script>
 <script>
-  // Redirect if already logged in
+  // Splash screen
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      document.getElementById('splash').classList.add('hide');
+    }, 2200);
+  });
+
+  // Nav update if logged in
   const u = Auth.get();
   if (u) {
-    document.querySelector('.nav-links').innerHTML = `
-      <span style="color:rgba(255,255,255,.7);font-size:.9rem">Hi, ${u.name}</span>
-      <button class="nav-btn solid" onclick="location.href='${u.role === 'company' ? 'company' : 'user'}/dashboard.html'">Dashboard</button>
+    document.getElementById('nav-links').innerHTML = `
+      <span style="color:rgba(255,255,255,.65);font-size:.875rem;font-weight:500">${u.name}</span>
+      <button class="nav-btn filled" onclick="location.href='${u.role === 'company' ? 'company' : 'user'}/dashboard.html'">Dashboard</button>
     `;
   }
 </script>
