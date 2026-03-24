@@ -30,8 +30,9 @@ jobs:
 
             echo "====== STEP 2: Clone or Pull Repo ======"
             if [ -d "/home/ec2-user/hackathon-projecct" ]; then
-              cd /home/ec2-user/hackathon-projecct
-              git pull origin main
+            cd /home/ec2-user/hackathon-projecct
+              git fetch origin
+              git reset --hard origin/main
             else
               cd /home/ec2-user
               git clone https://github.com/Ranjit-08/hackathon-projecct.git
