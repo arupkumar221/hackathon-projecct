@@ -7,64 +7,135 @@
   <link rel="stylesheet" href="../css/style.css"/>
 </head>
 <body>
+
 <div class="auth-page">
-  <div class="auth-left">
+  <div class="auth-left" style="background:radial-gradient(ellipse 100% 80% at 0% 50%, rgba(16,185,129,.15) 0%, transparent 60%), linear-gradient(155deg, #052e16 0%, #064e3b 50%, #065f46 100%)">
     <div class="auth-left-grid"></div>
     <div class="auth-left-content">
-      <a href="../index.html" class="auth-logo" style="margin-bottom:48px">
-        <div class="auth-logo-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
+      <a href="../index.html" class="auth-logo" style="margin-bottom:48px;display:inline-flex;color:#fff">
+        <div class="auth-logo-icon" style="background:linear-gradient(135deg,#059669,#047857)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round">
+            <path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+          </svg>
+        </div>
         HireWalk
       </a>
-      <h2>Welcome back to your company dashboard.</h2>
-      <p style="margin-top:16px">Manage your walk-in drives, track bookings, and reach the right candidates.</p>
+
+      <h2>Find your next<br>team member</h2>
+      <p style="margin-top:14px">Post walk-in interviews and connect with qualified candidates in minutes.</p>
+
+      <div class="auth-feature-list">
+        <div class="auth-feature">
+          <div class="auth-feature-icon" style="background:rgba(16,185,129,.2);border-color:rgba(16,185,129,.35)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6ee7b7" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          Post unlimited interviews
+        </div>
+        <div class="auth-feature">
+          <div class="auth-feature-icon" style="background:rgba(16,185,129,.2);border-color:rgba(16,185,129,.35)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6ee7b7" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          Manage time slots & capacity
+        </div>
+        <div class="auth-feature">
+          <div class="auth-feature-icon" style="background:rgba(16,185,129,.2);border-color:rgba(16,185,129,.35)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6ee7b7" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          View candidate details
+        </div>
+        <div class="auth-feature">
+          <div class="auth-feature-icon" style="background:rgba(16,185,129,.2);border-color:rgba(16,185,129,.35)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6ee7b7" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          Real-time booking tracking
+        </div>
+      </div>
     </div>
   </div>
+
   <div class="auth-right">
     <div class="auth-form">
       <a href="../index.html" class="auth-logo">
-        <div class="auth-logo-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
+        <div class="auth-logo-icon" style="background:linear-gradient(135deg,#059669,#047857)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round">
+            <path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+          </svg>
+        </div>
         HireWalk
       </a>
-      <h2>Company Sign In</h2>
-      <p class="subtitle">Access your interview management portal</p>
-      <div id="alert-box"></div>
+
+      <h2>Company portal</h2>
+      <p class="subtitle">Sign in to manage your interviews</p>
+
+      <div id="alert"></div>
+
       <div class="form-group">
-        <label>Email</label>
-        <input class="form-control" id="email" type="email" placeholder="hr@yourcompany.com"/>
+        <label>Company Email</label>
+        <input type="email" class="form-control" id="email" placeholder="hr@company.com" autocomplete="email"/>
       </div>
+
       <div class="form-group">
         <label>Password</label>
-        <input class="form-control" id="password" type="password" placeholder="Your password"/>
+        <input type="password" class="form-control" id="password" placeholder="Enter your password" autocomplete="current-password"/>
       </div>
-      <button class="btn btn-primary" style="width:100%;margin-top:4px" id="login-btn" onclick="login()">Sign In</button>
-      <p style="text-align:center;margin-top:20px;font-size:.8rem;color:var(--muted)">
-        No account? <a href="register.html" style="color:var(--accent);font-weight:600">Register your company</a>
-      </p>
+
+      <button class="btn btn-success" id="login-btn" onclick="login()" style="width:100%;justify-content:center;padding:13px;font-size:.9rem;margin-top:8px">
+        Sign In to Dashboard
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+
+      <div style="text-align:center;margin-top:24px;font-size:.85rem;color:var(--muted)">
+        New company?
+        <a href="register.html" style="color:#6ee7b7;font-weight:600;margin-left:4px">Register here</a>
+      </div>
+
+      <div style="position:relative;margin:28px 0;display:flex;align-items:center;gap:12px">
+        <div style="flex:1;height:1px;background:var(--glass-border)"></div>
+        <span style="font-size:.75rem;color:var(--muted)">or</span>
+        <div style="flex:1;height:1px;background:var(--glass-border)"></div>
+      </div>
+
+      <div style="text-align:center;font-size:.845rem;color:var(--muted)">
+        Looking for a job?
+        <a href="../user/login.html" style="color:#93c5fd;font-weight:600;margin-left:4px">Candidate login</a>
+      </div>
     </div>
   </div>
 </div>
+
 <script src="../js/api.js"></script>
 <script src="../js/auth.js"></script>
 <script>
   Auth.redirectIfLoggedIn();
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') login();
+  });
+
   async function login() {
-    const btn   = document.getElementById('login-btn');
-    const box   = document.getElementById('alert-box');
     const email    = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
-    if (!email || !password) return showAlert(box, 'Email and password are required');
+    const alertEl  = document.getElementById('alert');
+    const btn      = document.getElementById('login-btn');
+
+    if (!email || !password) {
+      showAlert(alertEl, 'Please enter your email and password');
+      return;
+    }
+
     setLoading(btn, true, 'Signing in...');
     try {
-      const res = await Api.companyLogin({ email, password });
-      Auth.save(res.token, res.user);
-      location.href = 'dashboard.html';
+      const { token, user } = await Api.login('company', { email, password });
+      Auth.save(token, user);
+      document.body.classList.add('page-leaving');
+      setTimeout(() => { window.location.href = 'dashboard.html'; }, 220);
     } catch (err) {
-      showAlert(box, err.message);
-    } finally {
+      showAlert(alertEl, err.message);
       setLoading(btn, false);
     }
   }
-  document.addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
 </script>
 </body>
 </html>
