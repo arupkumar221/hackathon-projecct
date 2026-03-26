@@ -5,19 +5,25 @@ from config import Config
 
 def _send(to: str, subject: str, html: str) -> bool:
     try:
+        print("SMTP CONFIG:", Config.SMTP_HOST, Config.SMTP_PORT, Config.SMTP_USER)
+
         msg = MIMEMultipart('alternative')
         msg['Subject'] = subject
         msg['From']    = f"Walk-in Platform <{Config.SMTP_USER}>"
         msg['To']      = to
+
         msg.attach(MIMEText(html, 'html'))
+
         with smtplib.SMTP(Config.SMTP_HOST, Config.SMTP_PORT, timeout=15) as srv:
             srv.ehlo()
             srv.starttls()
             srv.login(Config.SMTP_USER, Config.SMTP_PASSWORD)
             srv.sendmail(Config.SMTP_USER, to, msg.as_string())
+
         return True
+
     except Exception as e:
-        print(f"[EMAIL ERROR] {e}")
+        print("❌ EMAIL ERROR:", e)
         return False
 
 def send_booking_confirmation(user_name, user_email, company_name, role, interview_date, slot_time):
