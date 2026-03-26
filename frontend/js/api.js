@@ -1,4 +1,4 @@
-const API_BASE = 'http://YOUR_EC2_PUBLIC_IP/api';
+const API_BASE = '/api';
 
 const Api = {
   _headers() {
