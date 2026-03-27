@@ -719,8 +719,9 @@
   let timerInterval = null;
 
   // ── Voice Setup ─────────────────────────────────────────────────────────────
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  let recognition         = null;
+  // We use MediaRecorder → Groq Whisper instead of SpeechRecognition because
+  // Chrome's SpeechRecognition ignores deviceId and always uses the Windows
+  // default communications device. MediaRecorder respects the exact deviceId.
   let isListening         = false;
   let aiVoiceOn           = true;
   let synth               = window.speechSynthesis;
@@ -729,8 +730,8 @@
   let selectedFemaleVoice = null;
   let selectedMicId       = '';
   let micStream           = null;
-  let audioCtx            = null;
-  let loopbackDest        = null;
+  let mediaRecorder       = null;
+  let audioChunks         = [];
 
   // ── TTS voices ──────────────────────────────────────────────────────────────
   function loadVoices() {
@@ -757,7 +758,7 @@
       const devices = await navigator.mediaDevices.enumerateDevices();
       const mics    = devices.filter(d => d.kind === 'audioinput');
       const sel     = document.getElementById('mic-select');
-      const prevVal = sel.value;
+      const prevVal = selectedMicId;
       sel.innerHTML = '';
       mics.forEach((d, i) => {
         const opt = document.createElement('option');
@@ -765,7 +766,6 @@
         opt.text  = d.label || `Microphone ${i + 1}`;
         sel.appendChild(opt);
       });
-      // Restore previous selection if still present
       if (prevVal && [...sel.options].some(o => o.value === prevVal)) sel.value = prevVal;
       selectedMicId = sel.value;
       document.getElementById('mic-selector-bar').style.display = 'flex';
@@ -774,54 +774,30 @@
 
   function onMicChange(deviceId) {
     selectedMicId = deviceId;
-    stopAudioContext();
+    stopMic();
   }
 
-  function stopAudioContext() {
+  function stopMic() {
     if (micStream) { micStream.getTracks().forEach(t => t.stop()); micStream = null; }
-    if (audioCtx)  { try { audioCtx.close(); } catch(e){} audioCtx = null; }
-    loopbackDest = null;
-  }
-
-  // ── KEY FIX: AudioContext loopback ──────────────────────────────────────────
-  // Chrome's SpeechRecognition always uses the OS default mic and ignores
-  // deviceId. The workaround: open the chosen device with getUserMedia, pipe
-  // it through an AudioContext into a MediaStreamDestination node, then feed
-  // THAT stream into a hidden <audio> element set as the page's default audio
-  // input. SpeechRecognition then picks it up via the loopback.
-  // ─────────────────────────────────────────────────────────────────────────────
-  async function openMicWithLoopback(deviceId) {
-    stopAudioContext();
-    const constraints = {
-      audio: deviceId
-        ? { deviceId: { exact: deviceId }, echoCancellation: true, noiseSuppression: true, sampleRate: 16000 }
-        : { echoCancellation: true, noiseSuppression: true, sampleRate: 16000 }
-    };
-    micStream   = await navigator.mediaDevices.getUserMedia(constraints);
-    audioCtx    = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
-    const src   = audioCtx.createMediaStreamSource(micStream);
-    loopbackDest = audioCtx.createMediaStreamDestination();
-    // Small gain to keep signal clean
-    const gain   = audioCtx.createGain();
-    gain.gain.value = 1.0;
-    src.connect(gain);
-    gain.connect(loopbackDest);
-    return loopbackDest.stream;
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+      try { mediaRecorder.stop(); } catch(e) {}
+    }
+    mediaRecorder = null;
+    audioChunks   = [];
   }
 
   // ── Test button ──────────────────────────────────────────────────────────────
   async function testMicAudio() {
     const bar = document.getElementById('mic-device-bar');
-    bar.className   = 'warn';
-    bar.style.background = '';
-    bar.style.color = '#92400e';
-    bar.innerHTML   = '🎙️ Testing for 2 seconds… speak now!';
+    bar.className = 'warn';
+    bar.style.background = ''; bar.style.color = '#92400e';
+    bar.innerHTML = '🎙️ Testing for 2 seconds… speak now!';
     try {
       const constraints = { audio: selectedMicId ? { deviceId: { exact: selectedMicId } } : true };
-      const stream  = await navigator.mediaDevices.getUserMedia(constraints);
-      const ctx     = new AudioContext();
-      const src     = ctx.createMediaStreamSource(stream);
-      const analyser= ctx.createAnalyser();
+      const stream   = await navigator.mediaDevices.getUserMedia(constraints);
+      const ctx      = new AudioContext();
+      const src      = ctx.createMediaStreamSource(stream);
+      const analyser = ctx.createAnalyser();
       analyser.fftSize = 256;
       src.connect(analyser);
       const buf = new Uint8Array(analyser.frequencyBinCount);
@@ -831,10 +807,10 @@
       stream.getTracks().forEach(t => t.stop());
       ctx.close();
       if (maxVol > 10) {
-        bar.innerHTML = `✅ Mic working! Volume: ${maxVol}/255. Now click the mic button to speak.`;
+        bar.innerHTML = `✅ Mic working! Volume: ${maxVol}/255. Now click the mic button and speak.`;
         bar.style.background = '#f0fdf4'; bar.style.color = '#166534';
       } else {
-        bar.innerHTML = `⚠️ No audio detected (${maxVol}/255). Select a different mic or check Windows Sound Settings → Input.`;
+        bar.innerHTML = `⚠️ No audio (${maxVol}/255). Try another mic from the dropdown.`;
       }
       setTimeout(clearMicBar, 6000);
     } catch(e) {
@@ -843,103 +819,177 @@
     }
   }
 
-  // ── SpeechRecognition build ──────────────────────────────────────────────────
-  function buildRecognition(stream) {
-    if (!SpeechRecognition) return;
-    recognition = new SpeechRecognition();
-    recognition.continuous     = false;
-    recognition.interimResults = true;
-    recognition.lang           = 'en-US';
-
-    recognition.onstart = () => {
-      isListening = true;
-      document.getElementById('voice-btn').classList.add('listening');
-      document.getElementById('voice-status').classList.add('active');
-      document.getElementById('user-input').placeholder = 'Listening...';
-      clearMicBar();
-    };
-
-    recognition.onresult = (e) => {
-      const transcript = Array.from(e.results).map(r => r[0].transcript).join('');
-      document.getElementById('user-input').value = transcript;
-      autoResize(document.getElementById('user-input'));
-    };
-
-    recognition.onend = () => {
-      isListening = false;
-      document.getElementById('voice-btn').classList.remove('listening');
-      document.getElementById('voice-status').classList.remove('active');
-      document.getElementById('user-input').placeholder = 'Type your answer or click mic to speak...';
-      stopAudioContext();
-      const val = document.getElementById('user-input').value.trim();
-      if (val) sendMessage();
-    };
-
-    recognition.onerror = (e) => {
-      isListening = false;
-      document.getElementById('voice-btn').classList.remove('listening');
-      document.getElementById('voice-status').classList.remove('active');
-      document.getElementById('user-input').placeholder = 'Type your answer or click mic to speak...';
-      stopAudioContext();
-      const bar = document.getElementById('mic-device-bar');
-      bar.className = 'warn';
-      if (e.error === 'not-allowed') {
-        bar.innerHTML = `⚠️ Mic blocked. Click <strong>🔒</strong> in address bar → Microphone → <strong>Allow</strong> → reload.`;
-      } else if (e.error === 'no-speech') {
-        bar.innerHTML = `🎙️ No speech heard. Try clicking <strong>🎙 Test</strong> first to confirm your mic volume, then speak again.`;
-        setTimeout(clearMicBar, 7000);
-      } else if (e.error === 'audio-capture') {
-        bar.innerHTML = `❌ No mic found. Connect a microphone and reload.`;
-      } else if (e.error !== 'aborted') {
-        bar.innerHTML = `⚠️ Mic error: <strong>${e.error}</strong>. Try a different mic or reload.`;
-        setTimeout(clearMicBar, 5000);
-      } else { clearMicBar(); }
-    };
-  }
-
   function clearMicBar() {
     const b = document.getElementById('mic-device-bar');
     b.className = ''; b.innerHTML = '';
     b.style.background = b.style.borderTopColor = b.style.color = '';
   }
 
-  // ── Toggle voice (main entry point) ─────────────────────────────────────────
+  // ── MediaRecorder recording ───────────────────────────────────────────────────
+  function setListeningUI(on) {
+    isListening = on;
+    document.getElementById('voice-btn').classList.toggle('listening', on);
+    document.getElementById('voice-status').classList.toggle('active', on);
+    document.getElementById('user-input').placeholder = on
+      ? 'Listening… speak now, then click Stop or wait for silence'
+      : 'Type your answer or click mic to speak...';
+  }
+
+  // Detect silence: stop recording after 2s of quiet
+  function startSilenceDetector(stream, onSilence) {
+    const ctx      = new AudioContext();
+    const src      = ctx.createMediaStreamSource(stream);
+    const analyser = ctx.createAnalyser();
+    analyser.fftSize = 512;
+    src.connect(analyser);
+    const buf = new Uint8Array(analyser.frequencyBinCount);
+    let silenceStart = null;
+    let raf;
+
+    function check() {
+      analyser.getByteFrequencyData(buf);
+      const vol = Math.max(...buf);
+      if (vol < 8) {
+        if (!silenceStart) silenceStart = Date.now();
+        else if (Date.now() - silenceStart > 2000) {
+          cancelAnimationFrame(raf);
+          ctx.close();
+          onSilence();
+          return;
+        }
+      } else {
+        silenceStart = null;
+      }
+      raf = requestAnimationFrame(check);
+    }
+    raf = requestAnimationFrame(check);
+    return () => { cancelAnimationFrame(raf); try { ctx.close(); } catch(e){} };
+  }
+
+  // Send recorded audio to Groq Whisper via your Flask backend
+  async function transcribeAudio(blob) {
+    const bar = document.getElementById('mic-device-bar');
+    bar.className = 'warn';
+    bar.style.background = '#f0f9ff'; bar.style.color = '#0369a1';
+    bar.innerHTML = '⏳ Transcribing your speech…';
+
+    try {
+      const form = new FormData();
+      // Use webm or whatever the browser recorded
+      const ext  = blob.type.includes('ogg') ? 'ogg' : blob.type.includes('mp4') ? 'mp4' : 'webm';
+      form.append('audio', blob, `recording.${ext}`);
+
+      const resp = await fetch(`${API_BASE}/mock/transcribe`, {
+        method:  'POST',
+        headers: { 'Authorization': `Bearer ${Auth.token()}` },
+        body:    form
+      });
+
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({}));
+        throw new Error(err.error || `HTTP ${resp.status}`);
+      }
+
+      const data = await resp.json();
+      clearMicBar();
+      return data.text?.trim() || '';
+    } catch(e) {
+      bar.innerHTML = `❌ Transcription failed: ${e.message}`;
+      setTimeout(clearMicBar, 5000);
+      return '';
+    }
+  }
+
+  // ── Main toggle ──────────────────────────────────────────────────────────────
   async function toggleVoice() {
-    if (!SpeechRecognition) {
-      alert('Speech recognition requires Google Chrome or Microsoft Edge.');
+    if (isListening) {
+      // Stop recording manually
+      if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
       return;
     }
-    if (isListening) { stopListening(); return; }
+
     if (isSpeaking) synth.cancel();
 
     const bar = document.getElementById('mic-device-bar');
     bar.className = 'warn';
+    bar.style.background = ''; bar.style.color = '#92400e';
     bar.innerHTML = '⏳ Opening microphone…';
 
     try {
-      // 1. Open chosen device and build AudioContext loopback stream
-      const loopStream = await openMicWithLoopback(selectedMicId);
+      const constraints = {
+        audio: selectedMicId
+          ? { deviceId: { exact: selectedMicId }, echoCancellation: true, noiseSuppression: true }
+          : { echoCancellation: true, noiseSuppression: true }
+      };
 
-      // 2. Populate mic list now that we have labels
+      micStream   = await navigator.mediaDevices.getUserMedia(constraints);
+      audioChunks = [];
+
+      // Populate mic list with real labels now that we have permission
       await populateMicList();
 
-      // 3. Build fresh recognition each time
-      buildRecognition(loopStream);
+      // Pick best supported MIME type
+      const mimeType = ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4']
+        .find(t => MediaRecorder.isTypeSupported(t)) || '';
 
+      mediaRecorder = new MediaRecorder(micStream, mimeType ? { mimeType } : {});
+
+      mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+
+      mediaRecorder.onstop = async () => {
+        setListeningUI(false);
+        stopMic();
+
+        const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+        audioChunks = [];
+
+        if (blob.size < 1000) {
+          clearMicBar();
+          return; // too short / empty — ignore
+        }
+
+        const text = await transcribeAudio(blob);
+        if (text) {
+          document.getElementById('user-input').value = text;
+          autoResize(document.getElementById('user-input'));
+          sendMessage();
+        }
+      };
+
+      mediaRecorder.onerror = (e) => {
+        setListeningUI(false);
+        stopMic();
+        bar.className = 'warn';
+        bar.innerHTML = `❌ Recording error: ${e.error?.message || 'unknown'}`;
+        setTimeout(clearMicBar, 4000);
+      };
+
+      // Start recording, collect in 250ms chunks for smoother silence detection
+      mediaRecorder.start(250);
+      setListeningUI(true);
       clearMicBar();
 
-      // 4. Start recognition — it will use the OS default mic.
-      //    On most laptops this now matches because we have the stream active.
-      //    If it still mismatches, user can press Test to confirm and change in Windows.
-      recognition.start();
+      // Auto-stop on silence (2s quiet = done speaking)
+      const stopSilence = startSilenceDetector(micStream, () => {
+        if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
+      });
+
+      // Safety: auto-stop after 30s max
+      const safetyTimer = setTimeout(() => {
+        if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
+      }, 30000);
+
+      mediaRecorder.addEventListener('stop', () => {
+        stopSilence();
+        clearTimeout(safetyTimer);
+      }, { once: true });
 
     } catch(err) {
       bar.className = 'warn';
       if (err.name === 'NotAllowedError') {
         bar.innerHTML = `⚠️ Mic denied. Click <strong>🔒</strong> → Microphone → <strong>Allow</strong> → reload.`;
       } else if (err.name === 'NotFoundError' || err.name === 'OverconstrainedError') {
-        bar.innerHTML = `❌ Selected mic not found. Choose another from the dropdown and try again.`;
-        // refresh list
+        bar.innerHTML = `❌ Selected mic not available. Choose another from the dropdown.`;
         selectedMicId = '';
         await populateMicList();
       } else {
@@ -949,7 +999,8 @@
   }
 
   function stopListening() {
-    if (recognition && isListening) recognition.stop();
+    if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
+    else { setListeningUI(false); stopMic(); }
   }
 
   function toggleAiVoice(el) {
@@ -1287,7 +1338,7 @@ Be concise, friendly and genuinely helpful. Do NOT conduct a mock interview — 
     ttsQueue = [];
     clearInterval(ttsResumeTimer);
     isSpeaking = false;
-    stopAudioContext();
+    stopMic();
     updateStats();
     showWelcome();
     document.getElementById('session-label').textContent = 'Start a session below';
