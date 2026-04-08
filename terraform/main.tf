@@ -136,7 +136,7 @@ resource "aws_db_instance" "mysql" {
 # Plain EC2 — no user_data
 resource "aws_instance" "app" {
   ami                    = "ami-0c02fb55956c7d316"
-  instance_type          = "t2.micro"
+  instance_type          = "t3.micro"
   subnet_id              = aws_subnet.public_a.id
   vpc_security_group_ids = [aws_security_group.ec2_sg.id]
   key_name               = var.key_pair_name
