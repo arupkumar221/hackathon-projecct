@@ -35,7 +35,7 @@ jobs:
               git reset --hard origin/main
             else
               cd /home/ec2-user
-              git clone https://github.com/Ranjit-08/hackathon-projecct.git
+              git clone https://github.com/arupkumar221/hackathon-projecct.git
               cd hackathon-projecct
             fi
 
